@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lobby</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #1a1a2e;
+      --surface:   #16213e;
+      --panel:     #0f3460;
+      --accent:    #e94560;
+      --accent-dim:#e9456033;
+      --text:      #e0e0e0;
+      --muted:     #7a7a9a;
+      --border:    #2a2a4a;
+      --success:   #4ecca3;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 280px 1fr;
+      grid-template-areas:
+        "header header"
+        "sidebar main";
+    }
+
+    /* HEADER */
+    header {
+      grid-area: header;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header .logo {
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    header .logo span { color: var(--text); }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      margin-left: auto;
+      transition: background 0.3s;
+    }
+    .status-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .status-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    /* SIDEBAR */
+    aside {
+      grid-area: sidebar;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .section-label {
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+    input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 8px 12px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    button {
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      color: var(--accent);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+      width: 100%;
+      transition: background 0.2s, color 0.2s;
+    }
+    button:hover { background: var(--accent); color: #fff; }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    button.primary:hover { opacity: 0.85; }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* roster */
+    .roster { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .roster-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: var(--mono);
+      color: var(--muted);
+    }
+    .roster-item .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      flex-shrink: 0;
+    }
+
+    /* MAIN */
+    main {
+      grid-area: main;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 56px);
+    }
+
+    .room-bar {
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--surface);
+    }
+    .room-bar span { color: var(--success); }
+
+    #output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #output::-webkit-scrollbar { width: 4px; }
+    #output::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .msg {
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 2px 0;
+    }
+    .msg .time { color: var(--muted); margin-right: 8px; }
+    .msg .sender { color: var(--accent); margin-right: 8px; font-weight: 600; }
+    .msg .text { color: var(--text); }
+    .msg.system .text { color: var(--muted); font-style: italic; }
+
+    .input-bar {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      gap: 8px;
+    }
+    .input-bar input {
+      flex: 1;
+    }
+    .input-bar button {
+      width: auto;
+      padding: 8px 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">lobby<span>.go</span></div>
+  <div class="status-label" id="statusLabel">disconnected</div>
+  <div class="status-dot" id="statusDot"></div>
+</header>
+
+<aside>
+  <div>
+    <div class="section-label">Identity</div>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="usernameInput" placeholder="enter username">
+    </div>
+    <br>
+    <button class="primary" onclick="connect()">Connect</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div>
+    <div class="section-label">Room</div>
+    <div class="field">
+      <label>Room name</label>
+      <input type="text" id="roomInput" placeholder="e.g. lobby1">
+    </div>
+    <br>
+    <button onclick="joinRoom()">Join Room</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="flex:1">
+    <div class="section-label">Connected</div>
+    <div class="roster" id="roster">
+      <div class="roster-item" style="color:var(--muted);font-size:12px;">No one here yet</div>
+    </div>
+  </div>
+</aside>
+
+<main>
+  <div class="room-bar">
+    room: <span id="currentRoomLabel">—</span>
+  </div>
+  <div id="output"></div>
+  <div class="input-bar">
+    <input type="text" id="messageInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</main>
+
+<script src="./scripts/index.js"></script>
+</body>
+</html>

@@ -55,6 +55,8 @@ func (c *Client) ReadLoop(h *Hub) {
 			h.LeaveRoom(c, msg.Room)
 		case "message":
 			h.Broadcast(h.Rooms[msg.Room], msg.Content, c.Name)
+
+		case "roster":
 		}
 	}
 }

@@ -3,6 +3,7 @@ package hub
 import (
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/google/uuid"
@@ -51,6 +52,7 @@ func (hub *Hub) JoinRoom(client *Client, roomName string) Message {
 	room.Clients[client.ID] = client
 	client.Room = roomName
 	log.Printf("Client: %s\nAdded to Room: %s", client.Name, room.Name)
+	hub.listUsersInRoom(room)
 	return Message{
 		Type:    "joined",
 		Room:    roomName,
@@ -62,6 +64,7 @@ func (h *Hub) LeaveRoom(client *Client, roomName string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.leaveRoom(client, roomName)
+
 }
 
 func (hub *Hub) leaveRoom(client *Client, roomName string) error {
@@ -75,22 +78,37 @@ func (hub *Hub) leaveRoom(client *Client, roomName string) error {
 		delete(hub.Rooms, roomName)
 		log.Printf("Room: %s is empty, deleting!", room.Name)
 	}
+	hub.listUsersInRoom(room)
 	return nil
 }
 
 func (hub *Hub) Broadcast(room *Room, message string, sender string) {
 	hub.mu.Lock()
 	defer hub.mu.Unlock()
-	for client := range room.Clients {
+	for _, client := range room.Clients {
 		msg := Message{
 			Type:    "message",
 			Room:    room.Name,
 			Content: message,
 			Sender:  sender,
 		}
-		err := room.Clients[client].Send(msg)
+		err := client.Send(msg)
 		if err != nil {
-			log.Printf("Could not send message to client %s: %v", client, err)
+			log.Printf("Could not send message to client %s: %v", client.Name, err)
+		}
+	}
+}
+
+func (hub *Hub) listUsersInRoom(room *Room) {
+	var userList []string
+	for _, client := range room.Clients {
+		userList = append(userList, client.Name)
+	}
+	usersCSV := strings.Join(userList, ",")
+	for _, client := range room.Clients {
+		err := client.Send(Message{Type: "roster", Content: usersCSV})
+		if err != nil {
+			log.Printf("Could not send userlist message: %v", err)
 		}
 	}
 }

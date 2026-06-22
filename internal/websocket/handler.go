@@ -43,10 +43,7 @@ func HandleWS(h *hub.Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	username := r.URL.Query().Get("username")
-	var client *hub.Client
-	if len(username) >= 3 {
-		client = hub.NewClient(conn, username)
-	}
+	client := hub.NewClient(conn, username)
 	log.Printf("New client connected\nID: %s\nName: %s", client.ID, client.Name)
 
 	go client.ReadLoop(h)

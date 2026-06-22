@@ -17,10 +17,12 @@ function connect() {
   }
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
-    console.log(msg.type + ": " + msg.content);
-    p(msg.type + ": " + msg.content)
+    if (msg.type === "roster") {
+      updateRoster(msg.content)
+    } else if (msg.type === "message") {
+      p(msg.sender + ": " + msg.content)
+    }
   }
-
   ws.onclose = () => {
     console.log("Disconnected")
   }
@@ -37,3 +39,13 @@ function sendMessage() {
   ws.send(JSON.stringify({ type: "message", room: currentRoom, content: message }))
 }
 
+function updateRoster(csv) {
+  const users = csv.split(",")
+  const roster = document.getElementById("roster")
+  roster.innerHTML = ""
+  users.forEach(name => {
+    const div = document.createElement("div")
+    div.textContent = name
+    roster.appendChild(div)
+  })
+}
