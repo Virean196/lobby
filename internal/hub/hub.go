@@ -12,6 +12,7 @@ type Message struct {
 	Type    string `json:"type"`
 	Room    string `json:"room"`
 	Content string `json:"content"`
+	Sender  string `json:"sender"`
 }
 
 type Room struct {
@@ -70,19 +71,22 @@ func (hub *Hub) leaveRoom(client *Client, roomName string) error {
 	}
 	delete(room.Clients, client.ID)
 	log.Printf("Client: %s\nRemoved from room: %s", client.Name, room.Name)
-	if len(room.Clients) <= 0 {
+	if len(room.Clients) == 0 {
 		delete(hub.Rooms, roomName)
+		log.Printf("Room: %s is empty, deleting!", room.Name)
 	}
-	log.Printf("Room: %s is empty, deleting!", room.Name)
 	return nil
 }
 
-func (hub *Hub) Broadcast(room *Room, message string) {
+func (hub *Hub) Broadcast(room *Room, message string, sender string) {
+	hub.mu.Lock()
+	defer hub.mu.Unlock()
 	for client := range room.Clients {
 		msg := Message{
 			Type:    "message",
 			Room:    room.Name,
 			Content: message,
+			Sender:  sender,
 		}
 		err := room.Clients[client].Send(msg)
 		if err != nil {
