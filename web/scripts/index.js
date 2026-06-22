@@ -18,7 +18,7 @@ function connect() {
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     console.log(msg.type + ": " + msg.content);
-    p(msg.sender + ": " + msg.content)
+    p(msg.type + ": " + msg.content)
   }
 
   ws.onclose = () => {
