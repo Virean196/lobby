@@ -9,11 +9,14 @@
 </head>
 
 <body>
-  <button id="open">Open Connection</button>
-  <button id="send">Send Message</button>
-  <button id="close">Close Message</button>
-  <input id="input" />
-  <div id="output"></div>
+  <input type="text" id="usernameInput" placeholder="insert username">
+  <button onclick="connect()">Connect</button>
+  <br>
+  <input type="text" id="roomInput" placeholder="insert room name">
+  <button onclick="joinRoom()">Join Room</button>
+  <br>
+  <input type="text" id="messageInput" placeholder="insert message here">
+  <button onclick="sendMessage()">Send Message</button>
   <script src="./scripts/index.js"></script>
 </body>
 

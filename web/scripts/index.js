@@ -1,37 +1,28 @@
-window.addEventListener("load", function() {
-  var output = document.getElementById("output");
-  var input = document.getElementById("input");
-  var ws;
-
-  function print(message) {
-    var d = document.createElement("div");
-    d.textContent = message;
-    output.appendChild(d);
+var ws;
+var currentRoom = "";
+function connect() {
+  const username = document.getElementById("usernameInput").value;
+  ws = new WebSocket(`ws://localhost:8080/ws?username=${username}`)
+  ws.onopen = () => {
+    console.log("Connected as " + username);
+  }
+  ws.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    console.log(msg.type + ": " + msg.content);
   }
 
-  document.getElementById("open").onclick = function() {
-    if (ws) return;
-    ws = new WebSocket("ws://localhost:8080/echo");
-    ws.onopen = function() {
-      print("OPEN")
-    }
-    ws.onclose = () => {
-      print("CLOSE");
-      ws = null;
-    };
-    ws.onmessage = (evt) => print("RESPONSE: " + evt.data);
-    ws.onerror = () => print("ERROR");
-  };
+  ws.onclose = () => {
+    console.log("Disconnected")
+  }
+}
 
-  document.getElementById("send").onclick = function() {
-    if (!ws) return;
-    ws.send(input.value);
-    print("SEND: " + input.value);
-  };
+function joinRoom() {
+  const roomName = document.getElementById("roomInput").value;
+  currentRoom = roomName;
+  ws.send(JSON.stringify({ type: "join", room: roomName, content: "" }))
+}
 
-  document.getElementById("close").onclick = function() {
-    if (!ws) return;
-    ws.close()
-  };
-
-});
+function sendMessage() {
+  const message = document.getElementById("messageInput").value;
+  ws.send(JSON.stringify({ type: "message", room: currentRoom, content: message }))
+}
