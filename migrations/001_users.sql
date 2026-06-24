@@ -1,12 +1,11 @@
 -- +goose Up
 
-CREATE TABLE users {
-  id int NOT NULL,
+CREATE TABLE users (
+  id INT NOT NULL AUTO_INCREMENT,
   username text NOT NULL,
-  PRIAMRY KEY(id)
-};
-
-
+  password text NOT NULL,
+  PRIMARY KEY(id)
+  );
 
 -- +goose Down
 DROP TABLE users;
