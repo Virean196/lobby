@@ -17,7 +17,6 @@ func main() {
 	godotenv.Load()
 	mux := http.NewServeMux()
 	dsn := os.Getenv("DBACCESS")
-	log.Printf("DSN: %s", dsn)
 	dBase, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Print(err)
