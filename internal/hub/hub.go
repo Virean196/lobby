@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Virean196/lobby/internal/db"
 	"github.com/google/uuid"
 )
 
@@ -25,11 +26,13 @@ type Room struct {
 type Hub struct {
 	Rooms map[string]*Room
 	mu    sync.Mutex
+	Db    *db.Db
 }
 
-func NewHub() *Hub {
+func NewHub(db *db.Db) *Hub {
 	return &Hub{
 		Rooms: map[string]*Room{},
+		Db:    db,
 	}
 }
 

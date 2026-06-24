@@ -49,3 +49,17 @@ function updateRoster(csv) {
     roster.appendChild(div)
   })
 }
+
+async function register() {
+  const username = document.getElementById("usernameInputRegister").value
+  const password = document.getElementById("passwordInput").value
+
+  const response = await fetch("register", {
+    METHOD: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  })
+
+  const data = await response.json()
+  console.log(data)
+}
