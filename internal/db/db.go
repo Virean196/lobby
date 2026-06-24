@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Db struct {
@@ -14,7 +16,11 @@ func New(db *sql.DB) *Db {
 }
 
 func (db *Db) CreateUser(username, password string) error {
-	_, err := db.db.Exec("INSERT INTO users (username, password) VALUES (?,?)", username, password)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	_, err = db.db.Exec("INSERT INTO users (username, password) VALUES (?,?)", username, hashed)
 	if err != nil {
 		return err
 	}
