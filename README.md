@@ -8,10 +8,11 @@ A real-time WebSocket lobby server written in Go.
 - Clients can create and join named rooms
 - Messages are broadcast to all clients in the same room
 - Rooms are automatically created on join and cleaned up when empty
+- User registration with hashed passwords
 
 ## Tech stack
 
-- Go (net/http, gorilla/websocket)
+- Go (net/http, gorilla/websocket, database/sql)
 - Vanilla JS + HTML frontend
 - Mutex-protected concurrent state management
 
@@ -19,7 +20,7 @@ A real-time WebSocket lobby server written in Go.
 
 git clone https://github.com/Virean196/lobby
 cd lobby
-go run ./cmd/server
+go run ./cmd/server/main.go
 
 Then open http://localhost:8080 in your browser.
 
@@ -28,11 +29,13 @@ Then open http://localhost:8080 in your browser.
 cmd/server    → entrypoint
 internal/hub  → Hub, Room, Client structs and logic
 internal/handlers → HTTP and WebSocket route registration
+internal/db  → MySQL integration for authentication and logging
 web           → Frontend HTML/JS client
 
 ## Roadmap
 
-- [ ] Roster broadcast (show connected clients per room)
+- [X] Roster broadcast (show connected clients per room)
 - [ ] Disconnect cleanup improvements
 - [ ] Room capacity limits
 - [ ] Persistent room/player state
+- [ ] Authentication System
