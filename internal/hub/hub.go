@@ -21,6 +21,7 @@ type Room struct {
 	ID      string
 	Name    string
 	Clients map[string]*Client
+	Limit   int
 }
 
 type Hub struct {
@@ -48,6 +49,7 @@ func (hub *Hub) JoinRoom(client *Client, roomName string) Message {
 			ID:      uuid.New().String(),
 			Name:    roomName,
 			Clients: map[string]*Client{},
+			Limit:   1,
 		}
 		hub.Rooms[roomName] = room
 		log.Printf("Room Created!\nID: %s\nName: %s\n", room.ID, room.Name)

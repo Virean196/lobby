@@ -30,6 +30,8 @@ func Register(mux *http.ServeMux, h *hub.Hub, db *db.Db) {
 		}
 		err = json.Unmarshal(body, &request)
 		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"message": "unable to unmarshal request body"}`))
 		}
 		err = db.CreateUser(request.Username, request.Password)
 		fmt.Printf("User: %s - Created", request.Username)
@@ -40,5 +42,7 @@ func Register(mux *http.ServeMux, h *hub.Hub, db *db.Db) {
 		}
 		w.Write([]byte(`{"message": "user created"}`))
 	})
+
+	// Host a fileserver on the folder "web"
 	mux.Handle("/", http.FileServer(http.Dir("./web")))
 }
