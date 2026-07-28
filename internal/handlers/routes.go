@@ -34,10 +34,11 @@ func Register(mux *http.ServeMux, h *hub.Hub, db *db.Db) {
 			w.Write([]byte(`{"message": "unable to unmarshal request body"}`))
 		}
 		err = db.CreateUser(request.Username, request.Password)
-		fmt.Printf("User: %s - Created", request.Username)
+		fmt.Printf("User: %s - Created\n", request.Username)
 		if err != nil {
 			log.Printf("Could not create user: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message": "invalid username"`))
 			return
 		}
 		w.Write([]byte(`{"message": "user created"}`))
