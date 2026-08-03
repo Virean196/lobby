@@ -9,25 +9,6 @@ function p(msg) {
   output.appendChild(node)
 }
 
-function connect() {
-  const username = document.getElementById("usernameInput").value;
-  ws = new WebSocket(`ws://localhost:8080/ws?username=${username}`)
-  ws.onopen = () => {
-    console.log("Connected as " + username);
-  }
-  ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-    if (msg.type === "roster") {
-      updateRoster(msg.content)
-    } else if (msg.type === "message") {
-      p(msg.sender + ": " + msg.content)
-    }
-  }
-  ws.onclose = () => {
-    console.log("Disconnected")
-  }
-}
-
 function joinRoom() {
   const roomName = document.getElementById("roomInput").value;
   currentRoom = roomName;
@@ -51,15 +32,54 @@ function updateRoster(csv) {
 }
 
 async function register() {
-  const username = document.getElementById("usernameInputRegister").value
-  const password = document.getElementById("passwordInput").value
-
+  const username = document.getElementById("registerUsername").value;
+  const password = document.getElementById("registerPassword").value;
   const response = await fetch("/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
   })
+  if (!response.ok) {
+    const text = await response.text();
+    console.error(`Registration failed (${response.status})`, text);
+    return;
+  }
 
   const data = await response.json()
   console.log(data)
+}
+
+async function login() {
+  const username = document.getElementById("loginUsername").value;
+  const password = document.getElementById("loginPassword").value;
+  const response = await fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  })
+  if (!response.ok) {
+    const text = await response.text();
+    console.error(`Login failed (${response.status}):`, text);
+    return;
+  }
+  const data = await response.json();
+  console.log(data);
+  if (response.ok) {
+    ws = new WebSocket(`ws://localhost:8080/ws?username=${username}`)
+    ws.onopen = () => {
+      console.log("Connected as " + username);
+    }
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "roster") {
+        updateRoster(msg.content)
+      } else if (msg.type === "message") {
+        p(msg.sender + ": " + msg.content)
+      }
+    }
+    ws.onclose = () => {
+      console.log("Disconnected")
+    }
+  }
+
 }

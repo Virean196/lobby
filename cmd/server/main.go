@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -27,5 +28,6 @@ func main() {
 
 	handlers.Register(mux, h, database)
 
+	fmt.Print("Server opening at http://localhost:8080\n")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
